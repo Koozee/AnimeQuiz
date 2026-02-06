@@ -53,7 +53,7 @@ export function AnswerOption({
                 group relative flex items-center p-4 md:p-5 rounded-full border-2 
                 bg-background-dark/40 hover:bg-secondary/10 hover:border-secondary hover:shadow-electric 
                 active:scale-[0.98] transition-all duration-200 w-full
-                disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 cursor-pointer
+                disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 cursor-pointer select-none
                 ${getStyles()}
             `}
         >

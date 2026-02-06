@@ -54,12 +54,6 @@ export default function QuizGame() {
         setTimerKey(prev => prev + 1);
     };
 
-    // Handle skip
-    const handleSkip = () => {
-        skipQuestion();
-        setTimerKey(prev => prev + 1);
-    };
-
     // Handle back
     const handleBack = () => {
         router.back();
@@ -101,30 +95,25 @@ export default function QuizGame() {
 
     return (
         <div className="bg-black text-white min-h-screen flex flex-col overflow-hidden bg-anime-linear relative">
-
             <QuizHeader
                 currentQuestion={currentIndex + 1}
                 totalQuestions={totalQuestions}
                 streak={streak}
                 score={score}
-                quizTitle="Anime & Manga Trivia"
                 onBack={handleBack}
             />
 
             {/* Main Content Area */}
             <main className="flex-1 w-full max-w-5xl mx-auto p-6 flex flex-col justify-center items-center relative z-10 gap-6 md:gap-8">
-
                 <QuizTimer
                     key={timerKey}
                     timer={30}
                     onTimeUp={handleTimeUp}
                     isPaused={isAnswered}
                 />
-
                 <QuestionCard
                     question={decodeHTMLEntities(currentQuestion.question)}
                 />
-
                 {/* Answer Grid */}
                 <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                     {answers.map((answer) => (
@@ -140,8 +129,7 @@ export default function QuizGame() {
                         />
                     ))}
                 </div>
-
-                <QuizFooter onReport={handleReport} onSkip={handleSkip} />
+                <QuizFooter onReport={handleReport} />
             </main>
         </div>
     );

@@ -4,7 +4,7 @@ interface QuestionCardProps {
 
 export function QuestionCard({ question }: QuestionCardProps) {
     return (
-        <section className="w-full bg-glass backdrop-blur-xl border-2 border-white/80 shadow-2xl rounded-2xl p-8 md:p-12 relative overflow-hidden">
+        <section className="w-full bg-glass backdrop-blur-xl border-2 border-white/80 shadow-2xl rounded-2xl p-8 md:p-12 relative overflow-hidden pointer-events-none select-none">
 
             <div className="flex flex-col md:flex-row gap-8 items-center">
                 {/* Text Content */}

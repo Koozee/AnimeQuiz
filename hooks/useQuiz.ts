@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { getQuiz } from "@/services/quiz-service";
+import { decodeHTMLEntities } from "@/utils/decodeHTMLEntities";
 
 // Types
 interface QuizQuestion {
@@ -38,14 +39,6 @@ interface UseQuizReturn {
     nextQuestion: () => void;
     skipQuestion: () => void;
     resetQuiz: () => void;
-}
-
-// Helper function untuk decode HTML entities
-function decodeHTMLEntities(text: string): string {
-    if (typeof document === 'undefined') return text;
-    const textarea = document.createElement('textarea');
-    textarea.innerHTML = text;
-    return textarea.value;
 }
 
 // Helper function untuk shuffle array
