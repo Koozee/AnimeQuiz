@@ -8,7 +8,7 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AuthButton, AuthInput } from '@/components/ui';
+import { AuthButton, AuthInput } from '@/components/auth';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { useUser } from '@/hooks/useUser';
@@ -36,7 +36,7 @@ export default function LoginPage() {
         try {
             const user = users.find((user) => user.codename === data.username);
             if (user && comparePassword(data.password, user.password)) {
-                await login(user.codename);
+                await login(user.id, user.codename);
                 toast.success('Login successful');
                 router.push('/dashboard');
             } else {

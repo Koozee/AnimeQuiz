@@ -4,25 +4,29 @@ import {
     LayoutGrid,
     Trophy,
     Settings,
-    Gamepad2,
     Menu,
     X,
 } from 'lucide-react';
 
-import { SidebarItem, UserCard } from '@/components/ui';
+import { SidebarItem, UserCard } from '@/components/dashboard';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation'
+import { useAuth } from '@/hooks/useAuth';
+import { useUserById } from '@/hooks/useUser';
+
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname();
+    const { id, codename, logout } = useAuth();
+    const { user } = useUserById(id);
     const [sidebarOpen, setSidebarOpen] = useState(false);
     return (
-        <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white antialiased selection:bg-primary selection:text-white overflow-hidden min-h-screen lg:h-screen flex relative">
+        <div className="text-slate-900 dark:text-white antialiased selection:bg-primary selection:text-white overflow-hidden min-h-screen lg:h-screen flex relative">
 
             {/* Mobile Header */}
             <div className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-[#120b18]/90 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-linear-to-br from-primary to-blue-600 rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(127,13,242,0.4)]">
-                        <Gamepad2 className="text-white w-5 h-5" />
-                    </div>
+                    <Image src="/img/logoAnimeQuiz.webp" alt="Logo" width={50} height={50} />
                     <span className="text-lg font-bold text-white">Anime Quiz</span>
                 </div>
                 <button
@@ -61,23 +65,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </div>
                 </div>
 
-                {/* Nav */}
                 <nav className="flex flex-col gap-1.5 flex-1">
                     <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest px-4 mb-2">Main Menu</p>
-                    <SidebarItem path="/dashboard" icon={LayoutGrid} label="Dashboard" active />
-                    <SidebarItem path="/dashboard/leaderboard" icon={Trophy} label="Leaderboard" />
+                    <SidebarItem path="/dashboard" icon={LayoutGrid} label="Dashboard" active={pathname === '/dashboard'} />
+                    <SidebarItem path="/dashboard/leaderboard" icon={Trophy} label="Leaderboard" active={pathname.startsWith('/dashboard/leaderboard')} />
 
                     <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest px-4 mb-2 mt-6">Account</p>
-                    <SidebarItem path="/dashboard/settings" icon={Settings} label="Settings" />
+                    <SidebarItem path="/dashboard/settings" icon={Settings} label="Settings" active={pathname.startsWith('/dashboard/settings')} />
                 </nav>
 
                 {/* User Card */}
                 <UserCard
-                    name="Kai Kazama"
-                    role="Elite Challenger"
-                    avatarSrc="/img/heroLogin.webp"
-                    isOnline={true}
-                    onLogout={() => console.log('Logout clicked')}
+                    name={codename ?? ''}
+                    avatarSrc={user?.avatar ?? '/img/heroLogin.webp'}
+                    onLogout={logout}
                 />
             </aside>
 

@@ -1,39 +1,39 @@
 import { supabase } from "@/lib/supabase";
 
 export async function createUser(userData: { codename: string; password: string }) {
-    const { error } = await supabase
+    const { data, error } = await supabase
         .from('users')
         .insert(userData)
         .select()
         .single();
 
-    return { error };
+    return { data, error };
 }
 
 export async function getAllUsers() {
     const { data, error } = await supabase
         .from('users')
-        .select('codename, password');
+        .select('*');
 
     return { data, error };
 }
 
-export async function getUserById(id: string) {
-    const { error } = await supabase
+export async function getUserById(id: number) {
+    const { data, error } = await supabase
         .from('users')
-        .select('codename')
+        .select('*')
         .eq('id', id)
         .single();
 
-    return { error };
+    return { data, error };
 }
 
 export async function getUserByCodename(codename: string) {
-    const { error } = await supabase
+    const { data, error } = await supabase
         .from('users')
-        .select('codename')
+        .select('*')
         .eq('codename', codename)
         .single();
 
-    return { error };
+    return { data, error };
 }

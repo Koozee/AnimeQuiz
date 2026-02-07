@@ -7,7 +7,7 @@ import {
     Rotate3D
 } from 'lucide-react';
 
-import { StatCircle, StatusBadge, StatItem, StatsGrid } from '@/components/ui';
+import { StatCircle, StatusBadge, StatItem, StatsGrid } from '@/components/dashboard';
 
 export default function AnimeDashboard() {
     const [sidebarOpen, setSidebarOpen] = useState(false);

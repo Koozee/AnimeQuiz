@@ -1,26 +1,76 @@
-import { useEffect, useState } from "react";
-import { getAllUsers } from "@/services/userService";
+import { useEffect, useState, useCallback } from "react";
+import { supabase } from "@/lib/supabase";
 
-export function useUser() {
-    const [users, setUsers] = useState<any[]>([]);
+// Types
+export interface User {
+    id: number;
+    codename: string;
+    avatar: string;
+    created_at?: string;
+}
+
+// Hook untuk get semua users
+export function useUsers() {
+    const [users, setUsers] = useState<User[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    const fetchUsers = useCallback(async () => {
+        setLoading(true);
+        try {
+            const { data, error } = await supabase
+                .from('users')
+                .select('*');
+
+            if (error) throw error;
+            if (data) setUsers(data);
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchUsers();
+    }, [fetchUsers]);
+
+    return { users, loading, error, refetch: fetchUsers };
+}
+
+// Hook untuk get user by ID
+export function useUserById(id: number | undefined) {
+    const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        async function fetchUsers() {
+        if (!id) {
+            setLoading(false);
+            return;
+        }
+
+        async function fetchUser() {
+            setLoading(true);
             try {
-                const { data, error } = await getAllUsers();
+                const { data, error } = await supabase
+                    .from('users')
+                    .select('id, codename, avatar')
+                    .eq('id', id)
+                    .single();
 
                 if (error) throw error;
-                if (data) setUsers(data);
+                if (data) setUser(data);
             } catch (err: any) {
                 setError(err.message);
             } finally {
                 setLoading(false);
             }
         }
-        fetchUsers();
-    }, []);
+        fetchUser();
+    }, [id]);
 
-    return { users, loading, error };
+    return { user, loading, error };
 }
+
+export const useUser = useUsers;

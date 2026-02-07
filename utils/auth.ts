@@ -8,13 +8,14 @@ const AUTH_COOKIE_NAME = 'auth_token';
 const COOKIE_EXPIRES_DAYS = 7;
 
 export interface JWTPayload {
+    id?: number;
     codename: string;
     iat?: number;
     exp?: number;
 }
 
-export async function createToken(codename: string): Promise<string> {
-    const token = await new SignJWT({ codename })
+export async function createToken(id: number, codename: string): Promise<string> {
+    const token = await new SignJWT({ id, codename })
         .setProtectedHeader({ alg: 'HS256' })
         .setIssuedAt()
         .setExpirationTime('7d')
@@ -47,8 +48,8 @@ export function removeAuthToken(): void {
     Cookies.remove(AUTH_COOKIE_NAME);
 }
 
-export async function login(codename: string): Promise<void> {
-    const token = await createToken(codename);
+export async function login(id: number, codename: string): Promise<void> {
+    const token = await createToken(id, codename);
     setAuthToken(token);
 }
 
