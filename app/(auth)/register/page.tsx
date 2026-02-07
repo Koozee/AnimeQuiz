@@ -3,6 +3,7 @@ import {
     User,
     Key,
 } from 'lucide-react';
+import { useState } from 'react';
 import Image from "next/image";
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
@@ -10,6 +11,9 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
 import { AuthButton, AuthInput } from '@/components/ui';
+import { createUser } from '@/services/userService';
+import { hashPassword } from '@/utils/hashPassword';
+import { useRouter } from 'next/navigation';
 
 const registerSchema = z.object({
     username: z.string().min(3, 'Codename must be at least 3 characters long').max(10, 'Codename must be at most 10 characters long'),
@@ -23,6 +27,8 @@ const registerSchema = z.object({
 type RegisterSchema = z.infer<typeof registerSchema>;
 
 export default function RegisterPage() {
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
     const { register, handleSubmit, formState: { errors } } = useForm<RegisterSchema>({
         resolver: zodResolver(registerSchema),
         defaultValues: {
@@ -32,10 +38,26 @@ export default function RegisterPage() {
         },
     });
 
-    const saveUser = (data: RegisterSchema) => {
-        toast.success('Create Data Successfully!');
-        const { username, password } = data;
-        localStorage.setItem('user', JSON.stringify({ username, password }));
+    const saveUser = async (data: RegisterSchema) => {
+        setIsLoading(true);
+        try {
+            const { username, password } = data;
+            const { error } = await createUser({
+                codename: username,
+                password: hashPassword(password)
+            });
+
+            if (error) {
+                toast.error(error.message || 'Failed to create account');
+            } else {
+                toast.success('Account created successfully!');
+                router.push('/login');
+            }
+        } catch (err) {
+            toast.error('Something went wrong');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -107,7 +129,7 @@ export default function RegisterPage() {
                                 register={register('confirmPassword')}
                                 error={errors.confirmPassword?.message}
                             />
-                            <AuthButton text="Create Data" type="submit" />
+                            <AuthButton text="Create Data" type="submit" isLoading={isLoading} />
                         </form>
                     </div>
                     <div className="text-center mt-6">
