@@ -11,6 +11,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AuthButton, AuthInput } from '@/components/ui';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import { useUser } from '@/hooks/useUser';
+import { comparePassword } from '@/utils/hashPassword';
+import { useState } from 'react';
 
 const loginSchema = z.object({
     username: z.string().min(3, 'Codename must be at least 3 characters long').max(10, 'Codename must be at most 10 characters long'),
@@ -19,20 +22,29 @@ const loginSchema = z.object({
 
 type LoginSchema = z.infer<typeof loginSchema>;
 
-const userData = localStorage.getItem('user');
-const { username, password } = JSON.parse(userData || '{}');
-
 export default function LoginPage() {
     const { register, handleSubmit, formState: { errors } } = useForm<LoginSchema>({
         resolver: zodResolver(loginSchema),
     });
     const router = useRouter();
+    const { users, error } = useUser();
+    console.log(error)
+    const [isLoading, setIsLoading] = useState(false);
 
     const onSubmit = (data: LoginSchema) => {
-        if (data.username === username && data.password === password) {
-            router.push('/dashboard');
-        } else {
-            toast.error('Invalid Codename or Password');
+        setIsLoading(true);
+        try {
+            const user = users.find((user) => user.codename === data.username);
+            if (user && comparePassword(data.password, user.password)) {
+                toast.success('Login successful');
+                router.push('/dashboard');
+            } else {
+                toast.error('Invalid Codename or Password');
+            }
+        } catch (error) {
+            toast.error('Something went wrong');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -96,7 +108,7 @@ export default function LoginPage() {
                                 register={register('password')}
                                 error={errors.password?.message}
                             />
-                            <AuthButton text="Start Mission" type="submit" />
+                            <AuthButton text="Start Mission" type="submit" isLoading={isLoading} />
                         </form>
                     </div>
                     <div className="text-center mt-6">
