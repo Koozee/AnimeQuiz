@@ -11,11 +11,11 @@ export async function createUser(userData: { codename: string; password: string 
 }
 
 export async function getAllUsers() {
-    const { error } = await supabase
+    const { data, error } = await supabase
         .from('users')
         .select('codename, password');
 
-    return { error };
+    return { data, error };
 }
 
 export async function getUserById(id: string) {

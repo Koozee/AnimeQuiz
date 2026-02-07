@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { useUser } from '@/hooks/useUser';
 import { comparePassword } from '@/utils/hashPassword';
+import { login } from '@/utils/auth';
 import { useState } from 'react';
 
 const loginSchema = z.object({
@@ -27,15 +28,15 @@ export default function LoginPage() {
         resolver: zodResolver(loginSchema),
     });
     const router = useRouter();
-    const { users, error } = useUser();
-    console.log(error)
+    const { users } = useUser();
     const [isLoading, setIsLoading] = useState(false);
 
-    const onSubmit = (data: LoginSchema) => {
+    const onSubmit = async (data: LoginSchema) => {
         setIsLoading(true);
         try {
             const user = users.find((user) => user.codename === data.username);
             if (user && comparePassword(data.password, user.password)) {
+                await login(user.codename);
                 toast.success('Login successful');
                 router.push('/dashboard');
             } else {
@@ -43,6 +44,7 @@ export default function LoginPage() {
             }
         } catch (error) {
             toast.error('Something went wrong');
+            console.log(error);
         } finally {
             setIsLoading(false);
         }
