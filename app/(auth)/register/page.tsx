@@ -10,7 +10,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import toast from 'react-hot-toast';
-import { AuthButton, AuthInput } from '@/components/ui';
+import { AuthButton, AuthInput } from '@/components/auth';
 import { createUser } from '@/services/userService';
 import { hashPassword } from '@/utils/hashPassword';
 import { useRouter } from 'next/navigation';

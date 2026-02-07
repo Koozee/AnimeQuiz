@@ -4,7 +4,16 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSession, removeAuthToken, JWTPayload } from '@/utils/auth';
 
-export function useAuth() {
+interface AuthContextType {
+    session: JWTPayload | null;
+    loading: boolean;
+    isAuthenticated: boolean;
+    id?: number;
+    codename?: string;
+    logout: () => void;
+}
+
+export function useAuth(): AuthContextType {
     const [session, setSession] = useState<JWTPayload | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
@@ -28,7 +37,8 @@ export function useAuth() {
         session,
         loading,
         isAuthenticated: !!session,
-        codename: session?.codename ?? null,
+        id: session?.id,
+        codename: session?.codename,
         logout,
     };
 }
