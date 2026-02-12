@@ -3,15 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSession, removeAuthToken, JWTPayload } from '@/utils/auth';
-
-interface AuthContextType {
-    session: JWTPayload | null;
-    loading: boolean;
-    isAuthenticated: boolean;
-    id?: number;
-    codename?: string;
-    logout: () => void;
-}
+import { AuthContextType } from '@/types/auth';
 
 export function useAuth(): AuthContextType {
     const [session, setSession] = useState<JWTPayload | null>(null);

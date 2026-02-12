@@ -1,13 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
+import { User } from '@/types/user';
 
-// Types
-export interface User {
-    id: number;
-    codename: string;
-    avatar: string;
-    created_at?: string;
-}
+// Re-export for backward compatibility
+export type { User } from '@/types/user';
 
 // Hook untuk get semua users
 export function useUsers() {
