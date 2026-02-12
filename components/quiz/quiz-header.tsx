@@ -1,4 +1,4 @@
-import { ArrowLeft, Sparkles } from 'lucide-react';
+import { Home, Sparkles } from 'lucide-react';
 
 interface QuizHeaderProps {
     currentQuestion: number;
@@ -23,7 +23,7 @@ export function QuizHeader({
                 onClick={onBack}
                 className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer hover:scale-110"
             >
-                <ArrowLeft className="text-white" size={56} />
+                <Home className="text-white" size={56} />
             </button>
 
             {/* Progress Bar Center */}

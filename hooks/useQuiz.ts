@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { getQuiz } from "@/services/quiz-service";
 import { decodeHTMLEntities } from "@/utils/decodeHTMLEntities";
+import { getSessionQuizById, updateSessionQuiz } from '@/services/quiz-service';
 
 // Types
 interface QuizQuestion {
@@ -26,19 +27,25 @@ interface UseQuizReturn {
     // Game State
     score: number;
     streak: number;
+    correctAnswers: number;
     selectedAnswer: string | null;
     isAnswered: boolean;
 
     // Status
     loading: boolean;
     error: string | null;
-    isGameOver: boolean;
 
     // Actions
-    selectAnswer: (label: string) => boolean; // Returns true if correct
+    selectAnswer: (label: string) => boolean;
     nextQuestion: () => void;
     skipQuestion: () => void;
     resetQuiz: () => void;
+
+    // State Setters (for hydration)
+    setCurrentIndex: (index: number) => void;
+    setScore: (score: number) => void;
+    setStreak: (streak: number) => void;
+    setCorrectAnswers: (count: number) => void;
 }
 
 // Helper function untuk shuffle array
@@ -60,13 +67,14 @@ export function useQuiz(): UseQuizReturn {
     // Game states
     const [score, setScore] = useState(0);
     const [streak, setStreak] = useState(0);
+    const [correctAnswers, setCorrectAnswers] = useState(0);
     const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
 
     // Status states
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Fetch quiz data
+    // Fetch quiz data (does NOT reset game state — that's handled by sync or resetQuiz)
     const fetchQuiz = useCallback(async () => {
         try {
             setLoading(true);
@@ -75,9 +83,9 @@ export function useQuiz(): UseQuizReturn {
 
             if (data.response_code === 0 && data.results.length > 0) {
                 setQuestions(data.results);
-                setCurrentIndex(0);
-                setScore(0);
-                setStreak(0);
+                // DO NOT reset currentIndex, score, streak, correctAnswers here
+                // Those will be set by the sync effect in QuizGame (from session data)
+                // or left at 0 for a brand new quiz
             } else {
                 setError('Failed to load questions');
             }
@@ -88,6 +96,7 @@ export function useQuiz(): UseQuizReturn {
             setLoading(false);
         }
     }, []);
+
 
     // Initial fetch
     useEffect(() => {
@@ -128,6 +137,7 @@ export function useQuiz(): UseQuizReturn {
         if (isCorrect) {
             setScore(prev => prev + 100 + (streak * 10));
             setStreak(prev => prev + 1);
+            setCorrectAnswers(prev => prev + 1);
         } else {
             setStreak(0);
         }
@@ -148,10 +158,22 @@ export function useQuiz(): UseQuizReturn {
         nextQuestion();
     }, [nextQuestion]);
 
-    // Reset quiz
+    // Reset quiz (for starting a new quiz from scratch)
     const resetQuiz = useCallback(() => {
+        setCurrentIndex(0);
+        setScore(0);
+        setStreak(0);
+        setCorrectAnswers(0);
+        setSelectedAnswer(null);
         fetchQuiz();
     }, [fetchQuiz]);
+
+    // Expose setters for hydration/sync
+    const setGameScore = useCallback((newScore: number) => setScore(newScore), []);
+    const setGameStreak = useCallback((newStreak: number) => setStreak(newStreak), []);
+    const setGameCorrectAnswers = useCallback((count: number) => setCorrectAnswers(count), []);
+    const setCurrentQuestionIndex = useCallback((index: number) => setCurrentIndex(index), []);
+
 
     return {
         // Data
@@ -164,18 +186,23 @@ export function useQuiz(): UseQuizReturn {
         // Game State
         score,
         streak,
+        correctAnswers,
         selectedAnswer,
         isAnswered: selectedAnswer !== null,
 
         // Status
         loading,
         error,
-        isGameOver: currentIndex >= questions.length - 1 && selectedAnswer !== null,
-
         // Actions
         selectAnswer,
         nextQuestion,
         skipQuestion,
         resetQuiz,
+
+        // State Setters (for hydration)
+        setCurrentIndex: setCurrentQuestionIndex,
+        setScore: setGameScore,
+        setStreak: setGameStreak,
+        setCorrectAnswers: setGameCorrectAnswers,
     };
 }

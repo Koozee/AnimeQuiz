@@ -11,14 +11,20 @@ import {
 import { SidebarItem, UserCard } from '@/components/dashboard';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation'
-import { useAuth } from '@/hooks/useAuth';
-import { useUserById } from '@/hooks/useUser';
+import { DashboardProvider, useDashboard } from '@/contexts/DashboardContext';
 
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+    return (
+        <DashboardProvider>
+            <DashboardContent>{children}</DashboardContent>
+        </DashboardProvider>
+    );
+}
+
+function DashboardContent({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
-    const { id, codename, logout } = useAuth();
-    const { user } = useUserById(id);
+    const { codename, user, logout } = useDashboard();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     return (
         <div className="text-slate-900 dark:text-white antialiased selection:bg-primary selection:text-white overflow-hidden min-h-screen lg:h-screen flex relative">
