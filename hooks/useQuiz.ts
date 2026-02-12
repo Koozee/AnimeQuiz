@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { getQuiz } from "@/services/quiz-service";
 import { decodeHTMLEntities } from "@/utils/decodeHTMLEntities";
-import { getSessionQuizById, updateSessionQuiz } from '@/services/quiz-service';
 import { QuizQuestion, ShuffledAnswer, UseQuizReturn } from '@/types/quiz';
 
 // Helper function untuk shuffle array
