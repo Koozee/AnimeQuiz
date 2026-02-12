@@ -4,10 +4,11 @@ import { useEffect, useRef, useState, useCallback } from "react";
 interface QuizTimerProps {
     timer: number;
     onTimeUp?: () => void;
+    onTick?: (time: number) => void;
     isPaused?: boolean;
 }
 
-export function QuizTimer({ timer, onTimeUp, isPaused = false }: QuizTimerProps) {
+export function QuizTimer({ timer, onTimeUp, onTick, isPaused = false }: QuizTimerProps) {
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const [time, setTime] = useState(timer);
 
@@ -36,7 +37,9 @@ export function QuizTimer({ timer, onTimeUp, isPaused = false }: QuizTimerProps)
                     clearTimer();
                     return 0;
                 }
-                return prevTime - 1;
+                const newTime = prevTime - 1;
+                if (onTick) onTick(newTime);
+                return newTime;
             });
         }, 1000);
 

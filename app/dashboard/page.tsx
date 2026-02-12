@@ -1,30 +1,67 @@
 'use client'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { getSessionQuiz, createSessionQuiz } from '@/services/quiz-service';
 import {
     Play,
     Swords,
     Sparkles,
-    Rotate3D
 } from 'lucide-react';
 
 import { StatCircle, StatusBadge, StatItem, StatsGrid } from '@/components/dashboard';
+import { useDashboard } from '@/contexts';
+import toast from 'react-hot-toast';
 
 export default function AnimeDashboard() {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const router = useRouter();
+    const { id } = useDashboard();
+    const [session, setSession] = useState<any>(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchSession = async () => {
+            if (id === undefined) return;
+            const { data, error } = await getSessionQuiz({ user_id: id });
+            if (!error && data) {
+                setSession(data);
+            } else {
+                setSession(null);
+            }
+        };
+        fetchSession();
+    }, [id]);
+
+    const handleStartQuiz = async () => {
+        if (id === undefined) return;
+        setIsLoading(true);
+
+        try {
+            if (session) {
+                router.push(`/quiz/${session.id}`);
+            } else {
+                const { data, error } = await createSessionQuiz({
+                    user_id: id,
+                    current_index: 0,
+                    correct_answers: 0,
+                    time_remaining: 90,
+                    is_completed: false
+                });
+                if (!error && data) {
+                    router.push(`/quiz/${data.id}`);
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Error starting quiz");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <>
             {/* Hero Banner - Enhanced */}
             <div className="relative w-full rounded-[2rem] lg:rounded-[2.5rem] bg-linear-to-br from-[#2a1b3d] via-[#1e1428] to-[#1a1025] border border-white/10 overflow-hidden group shadow-[0_20px_60px_-15px_rgba(127,13,242,0.3)]">
-                {/* Animated Background */}
-                <div className="absolute inset-0 opacity-30">
-                    <div className="absolute top-0 right-0 w-96 h-96 bg-primary/40 blur-[100px] rounded-full animate-pulse" />
-                    <div className="absolute bottom-0 left-0 w-72 h-72 bg-cyan-500/30 blur-[80px] rounded-full" />
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-linear(circle_at_center,rgba(127,13,242,0.1),transparent_70%)]" />
-                </div>
-
-                {/* Grid Pattern Overlay */}
-                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-linear(rgba(255,255,255,0.03) 1px, transparent 1px), linear-linear(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)', backgroundSize: '50px 50px' }} />
 
                 <div className="relative z-10 p-6 lg:p-10 xl:p-12 flex flex-col lg:flex-row items-center justify-between gap-8">
                     <div className="space-y-6 max-w-xl text-center lg:text-left">
@@ -41,18 +78,15 @@ export default function AnimeDashboard() {
                             </h1>
                         </div>
 
-                        {/* CTA Buttons */}
-                        <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                            <button className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-linear-to-r from-primary to-purple-600 text-white font-bold rounded-2xl shadow-[0_4px_25px_rgba(127,13,242,0.4)] hover:shadow-[0_0_40px_rgba(127,13,242,0.6)] transition-all duration-300 hover:-translate-y-1 active:translate-y-0 text-base overflow-hidden cursor-pointer">
-                                <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                                <Play className="fill-current w-5 h-5" />
-                                Resume Quiz
-                            </button>
-                            <button className="inline-flex items-center justify-center gap-2 px-6 py-4 bg-white/5 hover:bg-white/10 text-white font-medium rounded-2xl border border-white/10 hover:border-white/20 transition-all text-base cursor-pointer">
-                                <Rotate3D className="w-5 h-5 text-yellow-400" />
-                                Restart Quiz
-                            </button>
-                        </div>
+                        <button
+                            onClick={handleStartQuiz}
+                            disabled={isLoading}
+                            className="relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-linear-to-r from-primary to-purple-600 text-white font-bold rounded-2xl shadow-[0_4px_25px_rgba(127,13,242,0.4)] hover:shadow-[0_0_40px_rgba(127,13,242,0.6)] transition-all duration-300 hover:-translate-y-1 active:translate-y-0 text-base overflow-hidden cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
+                        >
+                            <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                            <Play className="fill-current w-5 h-5" />
+                            {isLoading ? 'Loading...' : (session ? 'Resume Quiz' : 'Start Quiz')}
+                        </button>
                     </div>
 
                     {/* Floating 3D Icon Animation - Enhanced */}
